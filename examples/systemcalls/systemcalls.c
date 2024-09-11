@@ -1,4 +1,9 @@
 #include "systemcalls.h"
+#include "sys/wait.h"
+#include "stdio.h"
+#include "errno.h"
+#include "stdlib.h"
+#include <unistd.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -16,8 +21,17 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
+	
+	int ret = system(cmd);
 
-    return true;
+	if ( ret == -1) {
+		perror("cmd");
+		return false;
+	}
+	else {
+		return true;
+	}
+
 }
 
 /**
@@ -58,6 +72,35 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+
+	int status;
+	pid_t pid;
+	int ret;
+
+	pid = fork();
+	
+	if ( pid == -1 ) {
+		perror("fork");
+		return(false);
+	}
+	else if ( pid == 0 ) {
+		ret = execv(command[0], command);
+		printf("confusion, %s", command[0]);
+		if ( ret == -1 ) {
+			printf("confusion???");
+			perror("execv");
+			return(false);
+		}
+	}
+	
+	if ( waitpid( pid, &status, 0 ) == -1 ) {
+		perror("waitpid");
+		return(false);
+	}
+	//else if ( WIFEXITED( status ) ) {
+	//	 WEXITSTATUS( status );
+	//}
+	
 
     va_end(args);
 
