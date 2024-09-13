@@ -163,7 +163,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
                 
         }
 
-        else  {
+        else if ( pid > 1 ) {
 		close(file_to_write);
                 if ( waitpid( pid, &status, 0) < 0 ) {
 			perror("waitpid");
@@ -173,6 +173,11 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
                 if ( status == 0 ) {
                         return(true);
                 }
+
+		if ( WIFEXITED(status) && !WEXITSTATUS(status) ) {
+                        return(true);
+                }
+
                 return false;
         }
 	
