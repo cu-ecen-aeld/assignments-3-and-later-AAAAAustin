@@ -4,6 +4,7 @@
 #include "errno.h"
 #include "stdlib.h"
 #include <unistd.h>
+#include <fcntl.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -75,36 +76,35 @@ bool do_exec(int count, ...)
 
 	int status;
 	pid_t pid;
-	int ret;
 
+	// starting new process 
 	pid = fork();
-	
-	if ( pid == -1 ) {
+	if ( pid < 0 ) {
 		perror("fork");
-		return(false);
+		return false;
 	}
+	// child process
 	else if ( pid == 0 ) {
-		ret = execv(command[0], command);
-		printf("confusion, %s", command[0]);
-		if ( ret == -1 ) {
-			printf("confusion???");
-			perror("execv");
-			return(false);
+		execv(command[0], command);
+
+	        perror("execv");
+	        exit(EXIT_FAILURE);
+	}
+	// parent process
+	else if ( pid > 0 )  {
+		if ( waitpid( pid, &status, 0) < 0 ){
+			perror("waitpid");
+			return false;
 		}
+		
+		if ( WIFEXITED(status) && !WEXITSTATUS(status) ) {
+			return(true);
+		}
+		return false;
 	}
-	
-	if ( waitpid( pid, &status, 0 ) == -1 ) {
-		perror("waitpid");
-		return(false);
-	}
-	//else if ( WIFEXITED( status ) ) {
-	//	 WEXITSTATUS( status );
-	//}
-	
 
-    va_end(args);
-
-    return true;
+    	va_end(args);
+    	return true;
 }
 
 /**
@@ -135,6 +135,47 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+
+	int status;
+        pid_t pid;
+
+	int file_to_write = open(outputfile, O_TRUNC|O_WRONLY|O_CREAT, 0644);
+
+        // starting new 
+        pid = fork();
+
+        if ( pid < 0 ) {
+                perror("fork");
+                return(false);
+        }
+        else if ( pid == 0 ) {
+		// dup2 redirecting stdout to file_to_write
+		if ( dup2(file_to_write, 1) < 0 ) {
+			perror("dup2");
+			return false;
+		}
+		// dont need file identifier anymore
+		close(file_to_write);
+                execv(command[0], command);
+                
+                perror("execv");
+                exit(EXIT_FAILURE);
+                
+        }
+
+        else  {
+		close(file_to_write);
+                if ( waitpid( pid, &status, 0) < 0 ) {
+			perror("waitpid");
+			return false;
+		}
+
+                if ( status == 0 ) {
+                        return(true);
+                }
+                return false;
+        }
+	
 
     va_end(args);
 
