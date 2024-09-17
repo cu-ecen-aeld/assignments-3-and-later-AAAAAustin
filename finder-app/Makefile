@@ -10,8 +10,8 @@ writer_compile: writer.c
 	$(CROSS_COMPILE)gcc -c writer.c -o writer.o
 
 clean:
-	rm writer
-	rm *.o
+	rm -f writer
+	rm -f *.o
 
 #Debugging
 test_writer: writer.c writer.o writer
