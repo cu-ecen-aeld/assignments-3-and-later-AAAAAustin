@@ -1,4 +1,4 @@
-#CROSS_COMPILE=aarch64-none-linux-gnu-
+CROSS_COMPILE ?=
 
 #Core makefile
 all: writer_link
