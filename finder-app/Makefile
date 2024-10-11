@@ -1,5 +1,3 @@
-CROSS_COMPILE ?=
-
 #Core makefile
 all: writer_link
 
