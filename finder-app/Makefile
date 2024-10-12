@@ -1,12 +1,13 @@
 #Core makefile
 all: writer_link
+CC = $(CROSS_COMPILE)
 
 #aarch64-none-linux-gnu-gcc
 writer_link: writer_compile
-	$(CROSS_COMPILE)gcc writer.o -o writer 
+	$(CC)gcc writer.o -o writer 
 
 writer_compile: writer.c
-	$(CROSS_COMPILE)gcc -c writer.c -o writer.o
+	$(CC)gcc -c writer.c -o writer.o
 
 clean:
 	rm -f writer
