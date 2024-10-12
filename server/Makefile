@@ -1,13 +1,14 @@
 #CROSS_COMPILE=aarch64-none-linux-gnu-
+$(CC)=$(CROSS_COMPULE)gcc
 
 all: aesdsocket_link
 
 #aarch64-none-linux-gnu-
 aesdsocket_link: aesdsocket_compile
-	$(CROSS_COMPILE)gcc aesdsocket.o -o aesdsocket 
+	$(CC) aesdsocket.o -o aesdsocket 
 
 aesdsocket_compile: aesdsocket.c
-	$(CROSS_COMPILE)gcc -c aesdsocket.c -o aesdsocket.o
+	$(CC) -c aesdsocket.c -o aesdsocket.o
 
 clean:
 	rm -f aesdsocket
